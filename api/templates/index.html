@@ -1,0 +1,168 @@
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f0f4f8;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+#cotizacionForm {
+    background: #ffffff;
+    padding: 30px 25px;
+    border-radius: 10px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    max-width: 480px;
+    width: 100%;
+    transition: box-shadow 0.3s ease;
+}
+
+#cotizacionForm:hover {
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+}
+
+.form-group {
+    margin-bottom: 18px;
+}
+
+label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+    color: #333;
+    font-size: 1rem;
+}
+
+input[type="text"],
+input[type="email"],
+select,
+textarea {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1.8px solid #ccc;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+    resize: vertical;
+    font-family: inherit;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+select:focus,
+textarea:focus {
+    border-color: #4a90e2;
+    outline: none;
+    box-shadow: 0 0 6px rgba(74, 144, 226, 0.5);
+}
+
+textarea {
+    min-height: 100px;
+}
+
+.btn-submit {
+    display: inline-block;
+    background: linear-gradient(135deg, #4a90e2, #357ABD);
+    color: white;
+    font-weight: 700;
+    font-size: 1.1rem;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    width: 100%;
+    transition: background 0.3s ease;
+    box-shadow: 0 4px 12px rgba(53, 122, 189, 0.4);
+}
+
+.btn-submit:hover {
+    background: linear-gradient(135deg, #357ABD, #2a5a92);
+}
+
+@media (max-width: 500px) {
+    #cotizacionForm {
+        padding: 25px 20px;
+    }
+}
+
+</style>
+
+<form id="cotizacionForm">
+        <div class="form-group">
+            <label for="nombre">Nombre del Cliente</label>
+            <input type="text" class="form-control" id="nombre" name="nombre" required>
+        </div>
+        <div class="form-group">
+            <label for="correo">Correo Electrónico</label>
+            <input type="email" class="form-control" id="correo" name="correo" required>
+        </div>
+        <div class="form-group">
+            <label for="tipoServicio">Tipo de Servicio</label>
+            <select class="form-control" id="tipoServicio" name="tipoServicio" required>
+                <option value="Constitución de empresa">Constitución de empresa</option>
+                <option value="Defensa laboral">Defensa laboral</option>
+                <option value="Consultoría tributaria">Consultoría tributaria</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="descripcionCaso">Descripción del Caso</label>
+            <textarea class="form-control" id="descripcionCaso" name="descripcionCaso" required></textarea>
+        </div>
+        <button type="submit" class="btn-submit">Generar Cotización</button>
+</form>
+
+<script>
+    document.getElementById('cotizacionForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const data = {
+            nombre: document.getElementById('nombre').value,
+            correo: document.getElementById('correo').value,
+            tipoServicio: document.getElementById('tipoServicio').value,
+            descripcionCaso: document.getElementById('descripcionCaso').value,
+        };
+
+        const response = await fetch('/api/cotizacion/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')  // si tienes CSRF en tu vista
+            },
+            body: JSON.stringify(data)
+        });
+
+        this.reset();
+
+        const result = await response.json();
+        if (response.ok) {
+            alert(`Cotización generada:\nID: ${result.cotizacion_id}\nPrecio: S/ ${result.precio}`);
+        } else {
+            alert('Ocurrió un error al generar la cotización.');
+        }
+    });
+
+    // Función para obtener el token CSRF si estás usando Django CSRF protection
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+
